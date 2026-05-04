@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import WordCard from '@/components/WordCard';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, RotateCcw } from 'lucide-react';
 
 const CATEGORIES = [
   'Mix of SAT and GRE',
@@ -38,6 +38,25 @@ export default function Home() {
     setWords((prev) => prev.filter(w => w.id !== wordId));
   };
 
+  const handleReset = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/progress/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category })
+      });
+      if (response.ok) {
+        await fetchWords(category);
+      } else {
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error('Error resetting progress:', error);
+      setIsLoading(false);
+    }
+  };
+
   return (
     <main className="min-h-screen p-8 md:p-12 lg:p-24 max-w-7xl mx-auto">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12 gap-6">
@@ -68,6 +87,15 @@ export default function Home() {
           >
             <RefreshCw size={18} className={'mr-2 ' + (isLoading ? 'animate-spin' : '')} />
             Re-fetch
+          </button>
+          
+          <button 
+            onClick={handleReset}
+            disabled={isLoading}
+            className="btn-primary bg-red-600 hover:bg-red-700 text-white"
+          >
+            <RotateCcw size={18} className={'mr-2 ' + (isLoading ? 'animate-spin' : '')} />
+            Reset
           </button>
         </div>
       </div>
